@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <title>Weather Dashboard</title>
+</head>
+
+<body>
+    <section class="top-nav">
+        <div class="container-fluid">
+            <nav class="navbar navbar-dark bg-dark">
+                <span class="navbar-text">
+                    Weather Dashboard
+                </span>
+            </nav>
+
+
+            <div class="form-group">
+                <label for="search">Search for a City</label>
+                <input type="text" class="form-control" id="search-city">
+                <button onclick="submit()" type="submit" class="btn btn-default" id="run-search">
+                    <i class="fa fa-search"></i> Search
+                </button>
+            </div>
+
+            <div id="historyList" class="list-group">
+            </div>
+
+            <div id=""></div>
+    </section>
+
+    <div class="city"></div>
+    <div class="dt"></div>
+    <div class="wind"></div>
+    <div class="tempF"></div>
+    <div class="humidity"></div>
+    <div class="uvIndex"></div>
+    <div class="5dayForcast"></div>
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+        var APIKey = "305e74f7b559dc205d357f22675c6297";
+        var queryUrl5Day = "api.openweathermap.org/data/2.5/forecast?q={city name}&appid={00eff7d761d251282cf428a2883520a6}";
+
+        localStorage.setItem('history', JSON.stringify([]))
+
+        function search(searchText) {
+            var currentWeatherUrl = `http://api.openweathermap.org/data/2.5/weather?q=${searchText}&appid=00eff7d761d251282cf428a2883520a6`;
+            fetch(currentWeatherUrl)
+                .then(response => response.json())
+                .then(function (response) {
+                    $(".dt").html("<h1>" + response.dt)
+                    $(".city").html("<h1>" + response.name + "</>");
+                    $(".wind").text("Wind Speed: " + response.wind.speed);
+
+                    $(".humidity").text("Humidity: " + response.main.humidity);
+
+                    var tempF = (response.main.temp - 273.15) * 1.80 + 32;
+                    $(".tempF").text("Temperature (F) " + tempF.toFixed(2));
+
+                    var uvIndexUrl = `http://api.openweathermap.org/data/2.5/uvi?appid=00eff7d761d251282cf428a2883520a6&lat=${response.coord.lat}&lon=${response.coord.lon}`
+                    fetch(uvIndexUrl)
+                        .then(uvResponse => uvResponse.json())
+                        .then(function (uvResponse) {
+                            $("#uvindex").text(uvResponse.value)
+                        });
+                });
+            
+
+        }
+
+        function addToHistory(cityName) {
+            var savedHistory = JSON.parse(localStorage.getItem('history'));
+            savedHistory.push(cityName);
+            localStorage.setItem('history', JSON.stringify(savedHistory));
+            $('#historyList').prepend(`<a href="#" onclick="${search(cityName)}" class="list-group-item">${cityName}</a>`)
+        }
+
+        function submit() {
+            var searchText = $("#search-city").val();
+            search(searchText);
+            addToHistory(searchText);
+        }
+
+    </script>
+</body>
+
+</html>
